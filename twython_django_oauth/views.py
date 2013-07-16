@@ -51,34 +51,35 @@ def thanks(request, redirect_url=settings.LOGIN_REDIRECT_URL):
 	"""
 	# Now that we've got the magic tokens back from Twitter, we need to exchange
 	# for permanent ones and store them...
-	twitter = Twython(
-		twitter_token = settings.TWITTER_KEY,
-		twitter_secret = settings.TWITTER_SECRET,
+	APP_KEY = settings.TWITTER_KEY
+	APP_SECRET = settings.TWITTER_SECRET
+	twitter = Twython(APP_KEY, APP_SECRET,
 		oauth_token = request.session['request_token']['oauth_token'],
-		oauth_token_secret = request.session['request_token']['oauth_token_secret'],
-	)
+		oauth_token_secret = request.session['request_token']['oauth_token_secret'])
+
 
 	# Retrieve the tokens we want...
 	authorized_tokens = twitter.get_authorized_tokens(request.GET['oauth_verifier'])
 
 	# If they already exist, grab them, login and redirect to a page displaying stuff.
 	try:
-		user = User.objects.get(username = authorized_tokens['screen_name'])
+		user = User.objects.get(username = authorized_tokens["screen_name"])
 	except User.DoesNotExist:
 		# We mock a creation here; no email, password is just the token, etc.
-		user = User.objects.create_user(authorized_tokens['screen_name'], "fjdsfn@jfndjfn.com", authorized_tokens['oauth_token_secret'])
+		user = User.objects.create_user(authorized_tokens["screen_name"], "fjdsfn@jfndjfn.com", authorized_tokens["oauth_token_secret"])
 		profile = TwitterProfile()
 		profile.user = user
-		profile.oauth_token = authorized_tokens['oauth_token']
-		profile.oauth_secret = authorized_tokens['oauth_token_secret']
+		profile.oauth_token = authorized_tokens["oauth_token"]
+		profile.oauth_secret = authorized_tokens["oauth_token_secret"]
 		profile.save()
 
 	user = authenticate(
-		username = authorized_tokens['screen_name'],
-		password = authorized_tokens['oauth_token_secret']
+		username = authorized_tokens["screen_name"],
+		password = authorized_tokens["oauth_token_secret"]
 	)
 	login(request, user)
 	return HttpResponseRedirect(redirect_url)
+
 
 def user_timeline(request):
 	"""
