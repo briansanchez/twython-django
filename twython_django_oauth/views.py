@@ -26,11 +26,11 @@ def begin_auth(request):
 		For the most part, this is 100% drag and drop.
 	"""
 	# Instantiate Twython with the first leg of our trip.
-	twitter = Twython(
-		twitter_token = settings.TWITTER_KEY,
-		twitter_secret = settings.TWITTER_SECRET,
-		callback_url = request.build_absolute_uri(reverse('twython_django_oauth.views.thanks'))
-	)
+	APP_KEY = settings.TWITTER_KEY
+	APP_SECRET = settings.TWITTER_SECRET
+	twitter = Twython(APP_KEY, APP_SECRET)
+	auth_props = twitter.get_authentication_tokens(callback_url=request.build_absolute_uri(reverse('twython_django_oauth.views.thanks')))
+
 
 	# Request an authorization url to send the user to...
 	auth_props = twitter.get_authentication_tokens()
